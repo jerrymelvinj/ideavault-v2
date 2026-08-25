@@ -28,11 +28,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    // Safety fallback timer so loading never hangs
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 600);
+
     const unsubscribe = subscribeToAuthChanges((authUser) => {
       setUser(authUser);
       setLoading(false);
+      clearTimeout(safetyTimer);
     });
-    return () => unsubscribe();
+
+    return () => {
+      clearTimeout(safetyTimer);
+      unsubscribe();
+    };
   }, []);
 
   const handleGoogleSignIn = async () => {
