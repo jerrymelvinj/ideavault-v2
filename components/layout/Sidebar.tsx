@@ -13,6 +13,8 @@ import {
   Upload,
   Settings,
   Lightbulb,
+  Kanban,
+  TrendingUp,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -22,10 +24,12 @@ export function Sidebar() {
     { name: "Home", href: "/", icon: Home },
     { name: "Capture", href: "/capture", icon: PenTool, highlight: true },
     { name: "Library", href: "/library", icon: BookOpen },
+    { name: "Knowledge Graph", href: "/graph", icon: GitFork },
+    { name: "Projects & Kanban", href: "/projects", icon: Kanban },
+    { name: "Weekly Digest", href: "/digest", icon: TrendingUp },
     { name: "Search", href: "/search", icon: Search },
     { name: "AI Assistant", href: "/assistant", icon: Bot },
     { name: "Rediscover", href: "/rediscover", icon: Sparkles },
-    { name: "Connections", href: "/connections", icon: GitFork },
     { name: "Import Center", href: "/import", icon: Upload },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
@@ -40,14 +44,14 @@ export function Sidebar() {
           </div>
           <div>
             <h1 className="font-bold text-lg text-white tracking-wide flex items-center gap-1.5">
-              IdeaVault <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">MVP</span>
+              IdeaVault <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">Phase 2</span>
             </h1>
-            <p className="text-xs text-slate-400">Personal Second Brain</p>
+            <p className="text-xs text-slate-400">Intelligent Knowledge System</p>
           </div>
         </div>
 
         {/* Navigation Links */}
-        <nav className="p-3 space-y-1 mt-2">
+        <nav className="p-3 space-y-1 mt-1 overflow-y-auto max-h-[calc(100vh-14rem)]">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -55,9 +59,9 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                   isActive
-                    ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-sm"
+                    ? "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-sm font-semibold"
                     : item.highlight
                     ? "bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 border border-emerald-500/20"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -72,12 +76,12 @@ export function Sidebar() {
       </div>
 
       {/* Proactive Tip Banner */}
-      <div className="p-4 m-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
-        <div className="flex items-center gap-2 text-indigo-400 font-semibold mb-1">
-          <Lightbulb className="w-4 h-4" /> Proactive Memory
+      <div className="p-3 m-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px]">
+        <div className="flex items-center gap-1.5 text-indigo-400 font-semibold mb-0.5">
+          <Lightbulb className="w-3.5 h-3.5" /> Phase 2 Active
         </div>
-        <p className="text-slate-400 leading-relaxed">
-          AI continuously categorizes, connects thoughts & surfacing forgotten ideas.
+        <p className="text-slate-400 leading-snug">
+          Graph visualization, Voice capture & AI Kanban task boards enabled.
         </p>
       </div>
     </aside>

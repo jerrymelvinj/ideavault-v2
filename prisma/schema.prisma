@@ -1,4 +1,4 @@
-// Prisma Schema for IdeaVault (PostgreSQL for Vercel & Supabase)
+// Prisma Schema for IdeaVault Phase 2 (PostgreSQL for Vercel & Supabase)
 
 datasource db {
   provider = "postgresql"
@@ -31,7 +31,7 @@ model KnowledgeItem {
   summary          String?
   contentType      String               @default("Idea") // Idea, Note, Project, Research, Draft, Reference, Observation, Question
   status           String               @default("Active") // Active, InProgress, Archived, Unfinished, Abandoned
-  source           String               @default("Direct") // Direct, GoogleDocs, Notion, TXT, PDF, OCR, WhatsApp, Telegram
+  source           String               @default("Direct") // Direct, GoogleDocs, Notion, TXT, PDF, OCR, WhatsApp, Telegram, Voice
   projectId        String?
   project          Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
   categoryId       String?
@@ -103,15 +103,31 @@ model Project {
   name           String
   description    String?
   status         String          @default("Active") // Active, Completed, Paused
+  milestones     String?         // Stored as JSON string
+  roadmap        String?         // Stored as JSON string
   createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt @default(now())
   knowledgeItems KnowledgeItem[]
+  tasks          ProjectTask[]
+}
+
+model ProjectTask {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      String   @default("ToDo") // ToDo, InProgress, Done
+  priority    String   @default("Medium") // High, Medium, Low
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Source {
   id          String        @id @default(uuid())
   itemId      String
   item        KnowledgeItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  sourceType  String        // GoogleDocs, Notion, TXT, PDF, OCR, WhatsApp
+  sourceType  String        // GoogleDocs, Notion, TXT, PDF, OCR, WhatsApp, Telegram, Voice
   externalId  String?
   originalUrl String?
   importedAt  DateTime      @default(now())
