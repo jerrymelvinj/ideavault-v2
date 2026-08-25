@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   GitMerge,
   Sparkles,
@@ -11,12 +12,15 @@ import {
   CheckCircle2,
   Brain,
   FolderPlus,
+  Loader2,
 } from "lucide-react";
 import { IdeaForecastReport, IdeaForecast } from "@/lib/ai/forecast";
 
 export default function ForecastPage() {
   const [report, setReport] = useState<IdeaForecastReport | null>(null);
   const [loading, setLoading] = useState(true);
+  const [convertingId, setConvertingId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchForecasts();
@@ -31,6 +35,28 @@ export default function ForecastPage() {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleConvertToProject = async (fc: IdeaForecast) => {
+    setConvertingId(fc.id);
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fc.forecastTitle,
+          description: fc.convergingConceptSummary,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        router.push("/projects");
+      }
+    } catch (e) {
+      console.error("Failed to convert forecast to project:", e);
+    } finally {
+      setConvertingId(null);
     }
   };
 
@@ -102,12 +128,21 @@ export default function ForecastPage() {
                     <p className="text-slate-400 text-[11px]">{fc.suggestedNextStep}</p>
                   </div>
 
-                  <Link
-                    href="/projects"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition-colors"
+                  <button
+                    onClick={() => handleConvertToProject(fc)}
+                    disabled={convertingId === fc.id}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-md transition-colors"
                   >
-                    <FolderPlus className="w-3.5 h-3.5" /> Convert to Kanban Project Board &rarr;
-                  </Link>
+                    {convertingId === fc.id ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating AI Kanban Board...
+                      </>
+                    ) : (
+                      <>
+                        <FolderPlus className="w-3.5 h-3.5" /> Convert to Kanban Project Board &rarr;
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             ))}
