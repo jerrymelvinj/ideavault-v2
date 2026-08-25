@@ -105,8 +105,8 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center text-center space-y-8 py-12">
         {/* Brand Logo & Tagline */}
         <div className="space-y-4">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center mx-auto shadow-2xl shadow-indigo-600/40 border border-indigo-400/30">
-            <Brain className="w-9 h-9" />
+          <div className="w-16 h-16 rounded-3xl bg-slate-900 border border-slate-700 p-2.5 flex items-center justify-center mx-auto shadow-2xl shadow-indigo-600/30">
+            <img src="/logo.png" alt="IdeaVault Logo" className="w-full h-full object-contain" />
           </div>
 
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">

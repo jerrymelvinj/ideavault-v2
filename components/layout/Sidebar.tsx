@@ -12,7 +12,6 @@ import {
   GitFork,
   Upload,
   Settings,
-  Brain,
   Lightbulb,
 } from "lucide-react";
 
@@ -36,8 +35,8 @@ export function Sidebar() {
       <div>
         {/* Brand Header */}
         <div className="p-5 border-b border-slate-800/80 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
-            <Brain className="w-6 h-6" />
+          <div className="w-9 h-9 rounded-xl bg-slate-950 p-1 border border-slate-800 flex items-center justify-center shrink-0 shadow-md">
+            <img src="/logo.png" alt="IdeaVault Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="font-bold text-lg text-white tracking-wide flex items-center gap-1.5">
