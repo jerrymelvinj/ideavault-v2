@@ -13,27 +13,32 @@ export const db =
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 
 /**
- * Ensures a valid User record exists in Postgres DB to prevent Foreign Key errors
+ * Ensures a valid User record exists in Postgres DB for authenticated Google User or default user
  */
-export async function getOrCreateDefaultUser() {
-  const defaultEmail = "alex@ideavault.app";
-  
+export async function getOrCreateUser(userInfo?: { id?: string; email?: string; name?: string }) {
+  const email = userInfo?.email || "alex@ideavault.app";
+  const name = userInfo?.name || "Jerry";
+
   let user = await db.user.findFirst({
-    where: { email: defaultEmail },
+    where: { email },
   });
 
   if (!user) {
     user = await db.user.upsert({
-      where: { email: defaultEmail },
-      update: {},
+      where: { email },
+      update: { name },
       create: {
-        id: "default-user-id",
-        name: "Alex Rivera",
-        email: defaultEmail,
+        id: userInfo?.id || "default-user-id",
+        name,
+        email,
         preferences: JSON.stringify({ theme: "dark", aiProactive: true }),
       },
     });
   }
 
   return user;
+}
+
+export async function getOrCreateDefaultUser() {
+  return getOrCreateUser();
 }

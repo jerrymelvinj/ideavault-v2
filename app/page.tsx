@@ -15,8 +15,10 @@ import {
   Bookmark,
   TrendingUp,
 } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthContext";
 
 export default function HomePage() {
+  const { user } = useAuth();
   const [captureInput, setCaptureInput] = useState("");
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedFeedback, setCapturedFeedback] = useState<any>(null);
@@ -35,17 +37,16 @@ export default function HomePage() {
       const data = await res.json();
       setRecentItems((data.items || []).slice(0, 6));
 
-      // Fetch AI Insights or construct mock
       setInsights([
         {
           id: "1",
-          type: "Connection",
+          type: "Connection Insight",
           content: "Possible connection: 3 recent notes appear related to your 'AI Web-to-Figma Converter' concept.",
           date: "Just now",
         },
         {
           id: "2",
-          type: "Unfinished",
+          type: "Unfinished Insight",
           content: "You have 1 unfinished idea about voice-based capture that hasn't been revisited in 90 days.",
           date: "Yesterday",
         },
@@ -81,12 +82,14 @@ export default function HomePage() {
     }
   };
 
+  const displayName = user?.displayName ? user.displayName.split(" ")[0] : "Creator";
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Welcome Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-          Good morning, <span className="text-indigo-400">Alex</span> 👋
+          Good morning, <span className="text-indigo-400">{displayName}</span> 👋
         </h1>
         <p className="text-slate-400 text-sm mt-1">
           Your personal second brain remembers what you create and connects your thoughts automatically.
@@ -177,7 +180,7 @@ export default function HomePage() {
             </div>
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-indigo-300">{insight.type} Insight</span>
+                <span className="font-semibold text-indigo-300">{insight.type}</span>
                 <span className="text-slate-500">{insight.date}</span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">{insight.content}</p>
