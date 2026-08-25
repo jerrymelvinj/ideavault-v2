@@ -17,45 +17,35 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
  */
 export async function getOrCreateUser(userInfo?: { id?: string; email?: string; name?: string }) {
   const email = userInfo?.email || "jerrymelvinj@gmail.com";
-  const name = userInfo?.name || "Jerry";
+  const name = userInfo?.name || "Jerry Melvin J";
 
   let user = await db.user.findFirst({
-    where: { email },
+    where: { OR: [{ email }, { id: "default-user-id" }] },
   });
 
   if (!user) {
-    user = await db.user.upsert({
-      where: { email },
-      update: { name },
-      create: {
-        id: userInfo?.id || "default-user-id",
+    user = await db.user.create({
+      data: {
         name,
         email,
         preferences: JSON.stringify({ theme: "dark", aiProactive: true }),
       },
     });
+  } else if (user.email !== email) {
+    user = await db.user.update({
+      where: { id: user.id },
+      data: { email, name },
+    });
   }
-
-  // Link any orphaned knowledge items to this user so library is never empty
-  await db.knowledgeItem.updateMany({
-    where: { userId: { not: user.id } },
-    data: { userId: user.id },
-  });
 
   return user;
 }
 
 export async function getOrCreateDefaultUser() {
-  const firstUser = await db.user.findFirst({
+  const user = await db.user.findFirst({
     orderBy: { createdAt: "asc" },
   });
-  if (firstUser) {
-    // Re-link any orphaned items to first active user
-    await db.knowledgeItem.updateMany({
-      where: { userId: { not: firstUser.id } },
-      data: { userId: firstUser.id },
-    });
-    return firstUser;
-  }
+
+  if (user) return user;
   return getOrCreateUser();
 }
