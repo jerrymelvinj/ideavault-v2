@@ -1,4 +1,4 @@
-// Prisma Schema for IdeaVault Phase 2 (PostgreSQL for Vercel & Supabase)
+// Prisma Schema for IdeaVault Phase 3 (PostgreSQL for Vercel & Supabase)
 
 datasource db {
   provider = "postgresql"
@@ -10,16 +10,17 @@ generator client {
 }
 
 model User {
-  id             String          @id @default(uuid())
-  name           String
-  email          String          @unique
-  createdAt      DateTime        @default(now())
-  preferences    String?         // Stored as JSON string
-  knowledgeItems KnowledgeItem[]
-  categories     Category[]
-  tags           Tag[]
-  projects       Project[]
-  insights       AIInsight[]
+  id                 String              @id @default(uuid())
+  name               String
+  email              String              @unique
+  createdAt          DateTime            @default(now())
+  preferences        String?             // Stored as JSON string
+  knowledgeItems     KnowledgeItem[]
+  categories         Category[]
+  tags               Tag[]
+  projects           Project[]
+  insights           AIInsight[]
+  cognitiveSnapshots CognitiveSnapshot[]
 }
 
 model KnowledgeItem {
@@ -123,6 +124,18 @@ model ProjectTask {
   updatedAt   DateTime @updatedAt
 }
 
+model CognitiveSnapshot {
+  id                  String   @id @default(uuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  period              String   // e.g. "2026-Q3"
+  topicDistribution   String   // JSON string of category percentages
+  velocity            Int      @default(0)
+  convergingInsights  String?  // JSON string of forecasted convergences
+  strategicAdvice     String?
+  createdAt           DateTime @default(now())
+}
+
 model Source {
   id          String        @id @default(uuid())
   itemId      String
@@ -137,7 +150,7 @@ model AIInsight {
   id             String    @id @default(uuid())
   userId         String
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type           String    // Connection, Rediscover, Pattern, Unfinished, Revisit
+  type           String    // Connection, Rediscover, Pattern, Unfinished, Revisit, Forecast
   content        String
   relatedItemIds String?   // JSON array of item IDs
   confidence     Float     @default(0.85)
