@@ -233,7 +233,13 @@ export default function HomePage() {
           <textarea
             value={captureInput}
             onChange={(e) => setCaptureInput(e.target.value)}
-            placeholder="Type any raw thought, project concept, research note, or observation..."
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                handleQuickCapture(e);
+              }
+            }}
+            placeholder="Type any raw thought, project concept, research note... (Press ⌘ + Return to save)"
             rows={3}
             className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all resize-none shadow-inner"
           />

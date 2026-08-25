@@ -211,6 +211,13 @@ export default function KnowledgeItemDetailPage() {
                     <textarea
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
+                      onKeyDown={(e) => {
+                        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                          e.preventDefault();
+                          handleSaveEdit();
+                        }
+                      }}
+                      placeholder="Edit raw content... (Press ⌘ + Return / Ctrl + Enter to save)"
                       rows={10}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
                     />

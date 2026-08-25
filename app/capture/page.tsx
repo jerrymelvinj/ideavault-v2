@@ -92,7 +92,13 @@ export default function CapturePage() {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Type or record anything on your mind. AI will classify into categories, generate vector embeddings, and link to related thoughts..."
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                handleSave();
+              }
+            }}
+            placeholder="Type or record anything on your mind. AI will classify into categories... (Press ⌘ + Return / Ctrl + Enter to save & process)"
             rows={10}
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors resize-y leading-relaxed shadow-inner"
           />
