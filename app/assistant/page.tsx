@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Bot, Send, User, Sparkles, BookOpen, ExternalLink } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthContext";
 
 interface Message {
   id: string;
@@ -12,15 +13,22 @@ interface Message {
 }
 
 export default function AssistantPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      sender: "assistant",
-      text: "Hello Alex! I am your IdeaVault AI Assistant. Ask me anything about your captured thoughts, research notes, projects, or concepts. I will ground my answers in your personal knowledge base with citations.",
-    },
-  ]);
+  const { user } = useAuth();
+  const userName = user?.displayName ? user.displayName.split(" ")[0] : "there";
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+
+  useEffect(() => {
+    setMessages([
+      {
+        id: "1",
+        sender: "assistant",
+        text: `Hello ${userName}! I am your IdeaVault AI Assistant. Ask me anything about your captured thoughts, research notes, projects, or concepts. I will ground my answers in your personal knowledge base with citations.`,
+      },
+    ]);
+  }, [userName]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +129,11 @@ export default function AssistantPage() {
 
             {msg.sender === "user" && (
               <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 text-slate-300 flex items-center justify-center shrink-0 mt-1">
-                <User className="w-4 h-4" />
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt={user.displayName || "User"} className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  <User className="w-4 h-4" />
+                )}
               </div>
             )}
           </div>
