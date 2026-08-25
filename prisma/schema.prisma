@@ -1,0 +1,130 @@
+// Prisma Schema for IdeaVault
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  createdAt      DateTime        @default(now())
+  preferences    String?         // Stored as JSON string
+  knowledgeItems KnowledgeItem[]
+  categories     Category[]
+  tags           Tag[]
+  projects       Project[]
+  insights       AIInsight[]
+}
+
+model KnowledgeItem {
+  id               String               @id @default(uuid())
+  userId           String
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title            String
+  rawContent       String
+  summary          String?
+  contentType      String               @default("Idea") // Idea, Note, Project, Research, Draft, Reference, Observation, Question
+  status           String               @default("Active") // Active, InProgress, Archived, Unfinished, Abandoned
+  source           String               @default("Direct") // Direct, GoogleDocs, Notion, TXT, PDF, OCR, WhatsApp, Telegram
+  projectId        String?
+  project          Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  categoryId       String?
+  category         Category?            @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  embedding        String?              // Vector embedding stored as JSON float array string
+  structuredData   String?              // Extra AI insights/development/evaluation stored as JSON
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  tags             KnowledgeItemTag[]
+  sourceItemRel    Relationship[]       @relation("SourceRelationship")
+  targetItemRel    Relationship[]       @relation("TargetRelationship")
+  versions         Version[]
+  sources          Source[]
+}
+
+model Category {
+  id             String          @id @default(uuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  createdAt      DateTime        @default(now())
+  knowledgeItems KnowledgeItem[]
+}
+
+model Tag {
+  id             String             @id @default(uuid())
+  userId         String
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String             @unique
+  knowledgeItems KnowledgeItemTag[]
+}
+
+model KnowledgeItemTag {
+  itemId String
+  tagId  String
+  item   KnowledgeItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag    Tag           @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+}
+
+model Relationship {
+  id               String        @id @default(uuid())
+  sourceItemId     String
+  targetItemId     String
+  sourceItem       KnowledgeItem @relation("SourceRelationship", fields: [sourceItemId], references: [id], onDelete: Cascade)
+  targetItem       KnowledgeItem @relation("TargetRelationship", fields: [targetItemId], references: [id], onDelete: Cascade)
+  relationshipType String        // Similar, Related, EvolvesFrom, Contradicts, Supports, PartOf, InspiredBy
+  confidence       Float         @default(0.8)
+  reason           String?
+  createdAt        DateTime      @default(now())
+}
+
+model Version {
+  id            String        @id @default(uuid())
+  itemId        String
+  item          KnowledgeItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  content       String
+  changeSummary String?
+  createdAt     DateTime      @default(now())
+}
+
+model Project {
+  id             String          @id @default(uuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?
+  status         String          @default("Active") // Active, Completed, Paused
+  createdAt      DateTime        @default(now())
+  knowledgeItems KnowledgeItem[]
+}
+
+model Source {
+  id          String        @id @default(uuid())
+  itemId      String
+  item        KnowledgeItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  sourceType  String        // GoogleDocs, Notion, TXT, PDF, OCR, WhatsApp
+  externalId  String?
+  originalUrl String?
+  importedAt  DateTime      @default(now())
+}
+
+model AIInsight {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           String    // Connection, Rediscover, Pattern, Unfinished, Revisit
+  content        String
+  relatedItemIds String?   // JSON array of item IDs
+  confidence     Float     @default(0.85)
+  createdAt      DateTime  @default(now())
+  dismissedAt    DateTime?
+}
