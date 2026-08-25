@@ -87,8 +87,20 @@ export default function HomePage() {
     }
   };
 
-  // 1. UNAUTHENTICATED LANDING & LOGIN PAGE GATE
-  if (!user && !authLoading) {
+  // 1. AUTH LOADING SPINNER
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-3 text-slate-400 text-xs">
+          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <span>Verifying authentication...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. UNAUTHENTICATED LANDING & LOGIN PAGE GATE
+  if (!user) {
     return (
       <div className="max-w-4xl mx-auto min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center text-center space-y-8 py-12">
         {/* Brand Logo & Tagline */}
@@ -189,7 +201,7 @@ export default function HomePage() {
     );
   }
 
-  // 2. AUTHENTICATED DASHBOARD VIEW
+  // 3. AUTHENTICATED DASHBOARD VIEW
   const displayName = user?.displayName ? user.displayName.split(" ")[0] : "Creator";
 
   return (
