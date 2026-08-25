@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { db, getOrCreateDefaultUser } from "@/lib/db";
 import { convertIdeaToProject } from "@/lib/ai/projectGenerator";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const user = await getOrCreateDefaultUser();
@@ -13,7 +16,9 @@ export async function GET() {
       },
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json({ projects });
+    return NextResponse.json({ projects }, {
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+    });
   } catch (error: any) {
     console.error("GET /api/projects error:", error);
     return NextResponse.json({ error: error?.message || "Failed to fetch projects" }, { status: 500 });
@@ -38,6 +43,13 @@ export async function POST(req: Request) {
         userId: user.id,
         name: name || "New Project",
         description: description || "",
+        tasks: {
+          create: [
+            { title: "Define technical scope & requirements", priority: "High", status: "ToDo" },
+            { title: "Build core prototype architecture", priority: "High", status: "ToDo" },
+            { title: "User testing & feedback iteration", priority: "Medium", status: "ToDo" },
+          ],
+        },
       },
       include: { tasks: true },
     });

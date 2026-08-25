@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { db, getOrCreateDefaultUser } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -21,14 +24,17 @@ export async function GET(req: Request) {
         category: true,
         project: true,
         tags: { include: { tag: true } },
-        sourceItemRel: { include: { targetItem: true } },
-        targetItemRel: { include: { sourceItem: true } },
       },
       orderBy: { updatedAt: "desc" },
     });
 
-    return NextResponse.json({ items });
+    return NextResponse.json({ items }, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      },
+    });
   } catch (error: any) {
+    console.error("GET /api/items error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
