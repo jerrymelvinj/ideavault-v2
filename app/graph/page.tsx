@@ -21,9 +21,8 @@ export default function KnowledgeGraphPage() {
   const [edges, setEdges] = useState<GraphEdge[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 400, y: 300 });
-  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("All");
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -47,10 +46,7 @@ export default function KnowledgeGraphPage() {
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.2, 2.5));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.2, 0.4));
-  const handleResetZoom = () => {
-    setZoom(1);
-    setPan({ x: 400, y: 300 });
-  };
+  const handleResetZoom = () => setZoom(1);
 
   const filteredNodes = filterType === "All" ? nodes : nodes.filter((n) => n.type === filterType);
 
@@ -119,7 +115,7 @@ export default function KnowledgeGraphPage() {
         {/* 2D Visual Canvas Area */}
         <div
           ref={canvasRef}
-          className="flex-1 bg-slate-950 border border-slate-800/80 rounded-2xl relative overflow-hidden cursor-grab active:cursor-grabbing shadow-inner flex items-center justify-center"
+          className="flex-1 bg-slate-950 border border-slate-800/80 rounded-2xl relative overflow-hidden shadow-inner flex items-center justify-center"
         >
           {/* Subtle Grid Pattern Background */}
           <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none" />
@@ -161,6 +157,9 @@ export default function KnowledgeGraphPage() {
                 const x2 = targetNode.x || 0;
                 const y2 = targetNode.y || 0;
 
+                const isConnectedToHovered =
+                  hoveredNodeId === edge.source || hoveredNodeId === edge.target;
+
                 return (
                   <g key={edge.id}>
                     <line
@@ -168,16 +167,17 @@ export default function KnowledgeGraphPage() {
                       y1={y1}
                       x2={x2}
                       y2={y2}
-                      stroke="#475569"
-                      strokeWidth={1.5}
+                      stroke={isConnectedToHovered ? "#818cf8" : "#475569"}
+                      strokeWidth={isConnectedToHovered ? 2.5 : 1.5}
                       strokeDasharray={edge.label === "BelongsTo" ? "4 4" : undefined}
                       markerEnd="url(#arrow)"
-                      className="opacity-60"
+                      className="transition-all duration-200"
+                      strokeOpacity={isConnectedToHovered ? 0.9 : 0.4}
                     />
                     <text
                       x={(x1 + x2) / 2}
                       y={(y1 + y2) / 2 - 4}
-                      fill="#94a3b8"
+                      fill={isConnectedToHovered ? "#a5b4fc" : "#94a3b8"}
                       fontSize="9"
                       textAnchor="middle"
                       className="select-none font-sans opacity-80 pointer-events-none"
@@ -188,34 +188,38 @@ export default function KnowledgeGraphPage() {
                 );
               })}
 
-              {/* Render Graph Nodes */}
+              {/* Render Graph Nodes (Smooth Hover Radius) */}
               {filteredNodes.map((node) => {
                 const isSelected = selectedNode?.id === node.id;
+                const isHovered = hoveredNodeId === node.id;
                 const color = getNodeColor(node.type);
+                const radius = node.val + (isHovered ? 5 : 0);
 
                 return (
                   <g
                     key={node.id}
                     transform={`translate(${node.x || 0}, ${node.y || 0})`}
                     onClick={() => setSelectedNode(node)}
-                    className="cursor-pointer transition-transform hover:scale-125"
+                    onMouseEnter={() => setHoveredNodeId(node.id)}
+                    onMouseLeave={() => setHoveredNodeId(null)}
+                    className="cursor-pointer"
                   >
                     <circle
-                      r={node.val}
+                      r={radius}
                       fill={color}
-                      fillOpacity={0.25}
+                      fillOpacity={isHovered || isSelected ? 0.4 : 0.25}
                       stroke={color}
-                      strokeWidth={isSelected ? 3 : 1.5}
-                      className="transition-all"
+                      strokeWidth={isHovered ? 3.5 : isSelected ? 3 : 1.5}
+                      className="transition-all duration-150"
                     />
-                    <circle r={node.val / 2} fill={color} />
+                    <circle r={radius / 2} fill={color} className="transition-all duration-150" />
                     <text
-                      y={node.val + 14}
-                      fill={isSelected ? "#ffffff" : "#cbd5e1"}
+                      y={radius + 14}
+                      fill={isHovered || isSelected ? "#ffffff" : "#cbd5e1"}
                       fontSize="11"
-                      fontWeight={isSelected ? "bold" : "normal"}
+                      fontWeight={isHovered || isSelected ? "bold" : "normal"}
                       textAnchor="middle"
-                      className="select-none pointer-events-none shadow-sm"
+                      className="select-none pointer-events-none shadow-sm transition-all duration-150"
                     >
                       {node.label.length > 20 ? node.label.substring(0, 18) + "..." : node.label}
                     </text>
@@ -226,7 +230,7 @@ export default function KnowledgeGraphPage() {
           )}
 
           {/* Legend Overlay */}
-          <div className="absolute bottom-4 left-4 bg-slate-900/90 border border-slate-800 p-3 rounded-xl backdrop-blur-md text-[11px] space-y-1.5">
+          <div className="absolute bottom-4 left-4 bg-slate-900/90 border border-slate-800 p-3 rounded-xl backdrop-blur-md text-[11px] space-y-1.5 pointer-events-none">
             <span className="font-semibold text-slate-300 block mb-1">Graph Legend</span>
             <div className="flex items-center gap-2 text-slate-300">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400" /> Ideas
