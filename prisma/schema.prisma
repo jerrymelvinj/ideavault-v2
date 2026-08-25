@@ -1,8 +1,8 @@
-// Prisma Schema for IdeaVault
+// Prisma Schema for IdeaVault (PostgreSQL for Vercel / Managed Postgres)
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
