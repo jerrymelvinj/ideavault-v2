@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { performHybridSearch } from "@/lib/ai/search";
-import { db } from "@/lib/db";
+import { getOrCreateDefaultUser } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
@@ -10,11 +10,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ results: [] });
     }
 
-    const defaultUser = await db.user.findFirst();
-    const userId = defaultUser ? defaultUser.id : "default-user-id";
+    const user = await getOrCreateDefaultUser();
 
     const results = await performHybridSearch(query, {
-      userId,
+      userId: user.id,
       category,
       contentType,
       status,

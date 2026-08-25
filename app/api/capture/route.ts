@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, getOrCreateDefaultUser } from "@/lib/db";
 import { processKnowledgeItemPipeline } from "@/lib/ai/pipeline";
 
 export async function POST(req: Request) {
@@ -10,14 +10,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
-    // Default user ID for local MVP setup
-    const defaultUser = await db.user.findFirst();
-    const userId = defaultUser ? defaultUser.id : "default-user-id";
+    // Ensure User record exists in Postgres DB
+    const user = await getOrCreateDefaultUser();
 
     // 1. Create KnowledgeItem in DB immediately
     const item = await db.knowledgeItem.create({
       data: {
-        userId,
+        userId: user.id,
         title: title || "Untitled Idea",
         rawContent: content.trim(),
         summary: content.trim().substring(0, 120),

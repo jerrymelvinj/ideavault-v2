@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { answerQuestionWithKnowledgeBase } from "@/lib/ai/search";
-import { db } from "@/lib/db";
+import { getOrCreateDefaultUser } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
@@ -10,10 +10,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Question is required" }, { status: 400 });
     }
 
-    const defaultUser = await db.user.findFirst();
-    const userId = defaultUser ? defaultUser.id : "default-user-id";
+    const user = await getOrCreateDefaultUser();
 
-    const response = await answerQuestionWithKnowledgeBase(question, userId);
+    const response = await answerQuestionWithKnowledgeBase(question, user.id);
 
     return NextResponse.json(response);
   } catch (error: any) {

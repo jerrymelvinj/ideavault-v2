@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, getOrCreateDefaultUser } from "@/lib/db";
 
 export async function GET(req: Request) {
   try {
@@ -8,12 +8,11 @@ export async function GET(req: Request) {
     const category = searchParams.get("category");
     const status = searchParams.get("status");
 
-    const defaultUser = await db.user.findFirst();
-    const userId = defaultUser ? defaultUser.id : "default-user-id";
+    const user = await getOrCreateDefaultUser();
 
     const items = await db.knowledgeItem.findMany({
       where: {
-        userId,
+        userId: user.id,
         ...(contentType ? { contentType } : {}),
         ...(status ? { status } : {}),
         ...(category ? { category: { name: category } } : {}),

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, getOrCreateDefaultUser } from "@/lib/db";
 import { processKnowledgeItemPipeline } from "@/lib/ai/pipeline";
 import { generateTextResponse } from "@/lib/ai/gemini";
 
@@ -11,8 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Content is required" }, { status: 400 });
     }
 
-    const defaultUser = await db.user.findFirst();
-    const userId = defaultUser ? defaultUser.id : "default-user-id";
+    const user = await getOrCreateDefaultUser();
 
     let processedTitle = title || fileName || `Imported ${sourceType}`;
     let processedContent = content;
@@ -31,7 +30,7 @@ export async function POST(req: Request) {
 
     const item = await db.knowledgeItem.create({
       data: {
-        userId,
+        userId: user.id,
         title: processedTitle,
         rawContent: processedContent,
         summary: processedContent.substring(0, 150),
